@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/config"
+	"github.com/prabalesh/vanam/vanam-api/internal/database"
 )
 
 func main() {
@@ -13,6 +14,9 @@ func main() {
 	if cfg.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// database setup
+	database.Connect(cfg)
 
 	r := gin.Default()
 
