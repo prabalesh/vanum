@@ -24,5 +24,10 @@ func main() {
 		})
 	})
 
+	log.Printf("🚀 Movie Booking API server starting on port %s", cfg.Port)
+	log.Printf("📍 Environment: %s", cfg.Environment)
+	log.Printf("🎬 User App API: http://localhost:%s/api/user/v1", cfg.Port)
+	log.Printf("🏢 Admin App API: http://localhost:%s/api/admin/v1", cfg.Port)
+	log.Printf("❤️  Health Check: http://localhost:%s/health", cfg.Port)
 	log.Fatal(r.Run(":" + cfg.Port))
 }
