@@ -18,6 +18,7 @@ type User struct {
 	Name      string `gorm:"not null"`
 	RoleID    uint   `gorm:"not null"`
 	Role      Role   `gorm:"foreignKey:RoleID"`
+	IsActive  bool   `gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
