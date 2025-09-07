@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/prabalesh/vanam/vanam-api/internal/config"
+	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -33,4 +34,17 @@ func Connect(cfg *config.Config) {
 
 	sqlDB.SetMaxOpenConns(25)
 	sqlDB.SetMaxIdleConns(5)
+}
+
+func Migrate() {
+	err := DB.AutoMigrate(
+		&models.Role{},
+		&models.User{},
+	)
+
+	if err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
+
+	log.Println("✅ Database migration completed")
 }

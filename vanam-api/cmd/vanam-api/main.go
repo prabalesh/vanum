@@ -18,6 +18,7 @@ func main() {
 
 	// database setup
 	database.Connect(cfg)
+	database.Migrate()
 
 	r := gin.Default()
 
