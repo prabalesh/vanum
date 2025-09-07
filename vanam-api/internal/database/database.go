@@ -75,9 +75,9 @@ func SeedData() {
 	DB.Model(&models.User{}).Where("role_id = ?", adminRole.ID).Count(&adminCount)
 
 	if adminCount == 0 {
-		hashedPassword, _ := utils.HashPassword("admin123")
+		hashedPassword, _ := utils.HashPassword("vanam")
 		adminUser := models.User{
-			Email:    "admin@moviebooking.com",
+			Email:    "admin@vanam.com",
 			Password: hashedPassword,
 			Name:     "System",
 			RoleID:   adminRole.ID,
