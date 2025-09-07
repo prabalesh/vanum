@@ -13,3 +13,18 @@ func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+func SuccessResponse(message string, data interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"success": true,
+		"message": message,
+		"data":    data,
+	}
+}
+
+func ErrorResponse(message string) map[string]interface{} {
+	return map[string]interface{}{
+		"success": false,
+		"message": message,
+	}
+}

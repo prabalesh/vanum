@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/config"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/handlers"
 	"github.com/prabalesh/vanam/vanam-api/internal/middleware"
 )
 
@@ -33,6 +34,15 @@ func main() {
 			"version": "1.0.0",
 		})
 	})
+
+	adminAPI := r.Group("/api/admin/v1")
+	{
+		// Admin authentication
+		auth := adminAPI.Group("/auth")
+		{
+			auth.POST("/login", handlers.AdminLogin)
+		}
+	}
 
 	log.Printf("🚀 Movie Booking API server starting on port %s", cfg.Port)
 	log.Printf("📍 Environment: %s", cfg.Environment)
