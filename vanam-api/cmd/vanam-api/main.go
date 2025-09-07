@@ -8,6 +8,7 @@ import (
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
 	"github.com/prabalesh/vanam/vanam-api/internal/handlers"
 	"github.com/prabalesh/vanam/vanam-api/internal/middleware"
+	"github.com/prabalesh/vanam/vanam-api/pkg/redis"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	database.Connect(cfg)
 	database.Migrate()
 	database.SeedData()
+	redis.Connect(cfg)
 
 	r := gin.Default()
 

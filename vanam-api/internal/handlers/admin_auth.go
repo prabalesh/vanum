@@ -1,14 +1,17 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
 	"github.com/prabalesh/vanam/vanam-api/internal/dtos"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"github.com/prabalesh/vanam/vanam-api/internal/utils"
+	"github.com/prabalesh/vanam/vanam-api/pkg/redis"
 )
 
 func AdminLogin(c *gin.Context) {
@@ -39,8 +42,25 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
+	// Create admin session
+	session := models.Session{
+		SessionID: utils.GenerateSecureToken(),
+		UserID:    user.ID,
+		RoleID:    user.RoleID,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(8 * time.Hour),
+		IPAddress: c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
+	}
+
+	sessionJSON, _ := json.Marshal(session)
+	if err := redis.Client.Set(redis.Ctx, "session:"+session.SessionID, sessionJSON, 8*time.Hour).Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to create admin session"))
+		return
+	}
+
 	c.JSON(http.StatusOK, utils.SuccessResponse("Admin login successful", gin.H{
-		"token": "bruhh",
+		"token": session.SessionID,
 		"admin": gin.H{
 			"id":    user.ID,
 			"email": user.Email,

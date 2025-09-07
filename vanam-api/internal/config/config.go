@@ -15,6 +15,7 @@ type Config struct {
 	DBName      string
 	Port        string
 	Environment string
+	RedisURL    string
 }
 
 func Load() *Config {
@@ -31,6 +32,7 @@ func Load() *Config {
 		DBName:      getEnv("DB_NAME", "movie_booking"),
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENVIRONMENT", "development"),
+		RedisURL:    getEnv("REDIS_URL", "redis://localhost:6379"),
 	}
 }
 

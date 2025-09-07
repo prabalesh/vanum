@@ -1,6 +1,13 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // Hash password using bcrypt
 func HashPassword(password string) (string, error) {
@@ -12,6 +19,15 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+// Generate secure random token for sessions
+func GenerateSecureToken() string {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(bytes)
 }
 
 func SuccessResponse(message string, data interface{}) map[string]interface{} {
