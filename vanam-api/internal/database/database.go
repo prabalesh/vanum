@@ -6,6 +6,7 @@ import (
 
 	"github.com/prabalesh/vanam/vanam-api/internal/config"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
+	"github.com/prabalesh/vanam/vanam-api/internal/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -62,4 +63,28 @@ func SeedData() {
 			DB.Create(&role)
 		}
 	}
+
+	// Find admin role ID
+	var adminRole models.Role
+	if err := DB.Where("name = ?", "admin").First(&adminRole).Error; err != nil {
+		log.Fatalf("❌ Admin role not found: %v", err)
+	}
+
+	// Create admin user
+	var adminCount int64
+	DB.Model(&models.User{}).Where("role_id = ?", adminRole.ID).Count(&adminCount)
+
+	if adminCount == 0 {
+		hashedPassword, _ := utils.HashPassword("admin123")
+		adminUser := models.User{
+			Email:    "admin@moviebooking.com",
+			Password: hashedPassword,
+			Name:     "System",
+			RoleID:   adminRole.ID,
+			IsActive: true,
+		}
+		DB.Create(&adminUser)
+		log.Println("✅ Admin user created - Email: admin@moviebooking.com, Password: admin123")
+	}
+
 }
