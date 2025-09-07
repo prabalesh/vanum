@@ -48,3 +48,18 @@ func Migrate() {
 
 	log.Println("✅ Database migration completed")
 }
+
+func SeedData() {
+	roles := []models.Role{
+		{Name: "admin"},
+		{Name: "user"},
+		{Name: "moderator"},
+	}
+
+	for _, role := range roles {
+		var existingRole models.Role
+		if err := DB.Where("name = ?", role.Name).First(&existingRole).Error; err == gorm.ErrRecordNotFound {
+			DB.Create(&role)
+		}
+	}
+}
