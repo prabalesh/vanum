@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/config"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/middleware"
 )
 
 func main() {
@@ -19,6 +20,9 @@ func main() {
 	database.Connect(cfg)
 
 	r := gin.Default()
+
+	// middlewares
+	r.Use(middleware.CORS())
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
