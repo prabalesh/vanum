@@ -44,6 +44,15 @@ func main() {
 		{
 			auth.POST("/login", handlers.AdminLogin)
 		}
+
+		// All admin routes require authentication and admin role
+		adminProtected := adminAPI.Group("/")
+		adminProtected.Use(middleware.AdminAuthMiddleware())
+		{
+			adminProtected.GET("/dashboard", func(c *gin.Context) {
+				c.JSON(200, "success")
+			})
+		}
 	}
 
 	log.Printf("🚀 Movie Booking API server starting on port %s", cfg.Port)
