@@ -4,23 +4,35 @@ import type {
     ApiResponse,
   CreateUserFormData,
   GeneralUser,
+  Language,
+  Movie,
+  MovieFormData,
   PaginatedResponse,
   Role,
   RoleFormData,
+  Screening,
+  ScreeningFormData,
   UpdateUserFormData,
   User,
 } from "../types";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api/admin/v1";
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 // Create axios instance
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/admin/v1`,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+const public_api = axios.create({
+  baseURL: `${API_BASE_URL}/v1`,
+  headers: {
+    "Content-Type": "application/json"
+  }
+})
 
 // Request interceptor to add token
 api.interceptors.request.use(
@@ -102,7 +114,7 @@ export const rolesApi = {
 
 export const usersApi = {
   getAll: async (page = 1, limit = 20): Promise<PaginatedResponse<GeneralUser[]>> => {
-    const response = await api.get(`/users/?page=${page}&limit=${limit}`);
+    const response = await api.get(`/users?page=${page}&limit=${limit}`);
     return response.data;
   },
   getById: async (id: number): Promise<{ success: boolean; data: GeneralUser }> => {
@@ -110,7 +122,7 @@ export const usersApi = {
     return response.data;
   },
   create: async (data: CreateUserFormData): Promise<{ success: boolean; data: GeneralUser }> => {
-    const response = await api.post('/users/', data);
+    const response = await api.post('/users', data);
     return response.data;
   },
   update: async (id: number, data: Partial<UpdateUserFormData>): Promise<{ success: boolean; data: GeneralUser }> => {
@@ -119,6 +131,98 @@ export const usersApi = {
   },
   delete: async (id: number): Promise<{ success: boolean }> => {
     const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+};
+
+// Movies API
+export const moviesApi = {
+  // Public endpoints
+  getAll: async (page = 1, limit = 20, search?: string, genre?: string): Promise<PaginatedResponse<Movie[]>> => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (search) params.append('search', search);
+    if (genre) params.append('genre', genre);
+    
+    const response = await public_api.get(`/movies?${params}`);
+    return response.data;
+  },
+  
+  getById: async (id: number): Promise<{ success: boolean; data: Movie }> => {
+    const response = await public_api.get(`/movies/${id}`);
+    return response.data;
+  },
+
+  // Admin endpoints
+  create: async (data: MovieFormData): Promise<{ success: boolean; data: Movie }> => {
+    const response = await api.post('/movies', data);
+    return response.data;
+  },
+  
+  update: async (id: number, data: Partial<MovieFormData>): Promise<{ success: boolean; data: Movie }> => {
+    const response = await api.put(`/movies/${id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id: number): Promise<{ success: boolean }> => {
+    const response = await api.delete(`/movies/${id}`);
+    return response.data;
+  },
+};
+
+// Screenings API
+export const screeningsApi = {
+  // Public endpoints
+  getAll: async (
+    page = 1, 
+    limit = 20, 
+    filters?: {
+      movie_id?: number;
+      language_id?: number;
+      date?: string;
+      theater_id?: number;
+    }
+  ): Promise<PaginatedResponse<Screening[]>> => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    if (filters?.movie_id) params.append('movie_id', filters.movie_id.toString());
+    if (filters?.language_id) params.append('language_id', filters.language_id.toString());
+    if (filters?.date) params.append('date', filters.date);
+    if (filters?.theater_id) params.append('theater_id', filters.theater_id.toString());
+    
+    const response = await public_api.get(`/screenings?${params}`);
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<{ success: boolean; data: Screening }> => {
+    const response = await public_api.get(`/screenings/${id}`);
+    return response.data;
+  },
+
+  // Admin endpoints
+  create: async (data: ScreeningFormData): Promise<{ success: boolean; data: Screening }> => {
+    const response = await api.post('/screenings/', data);
+    return response.data;
+  },
+  
+  update: async (id: number, data: Partial<ScreeningFormData>): Promise<{ success: boolean; data: Screening }> => {
+    const response = await api.put(`/screenings/${id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id: number): Promise<{ success: boolean }> => {
+    const response = await api.delete(`/screenings/${id}`);
+    return response.data;
+  },
+};
+
+// Languages API
+export const languagesApi = {
+  getAll: async (): Promise<{ success: boolean; data: Language[] }> => {
+    const response = await public_api.get('/languages');
     return response.data;
   },
 };

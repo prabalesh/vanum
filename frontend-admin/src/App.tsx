@@ -6,6 +6,8 @@ import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./pages/Dashboard";
 import Roles from "./pages/Roles";
 import Users from "./pages/Users";
+import Screenings from "./pages/Screenings";
+import Movies from "./pages/Movies";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -38,9 +40,9 @@ const AppRoutes: React.FC = () => {
         <Route index element={<Dashboard />} />
         <Route path="roles" element={<Roles />} />
         <Route path="users" element={<Users />} />
-        {/* <Route path="theaters" element={<Theaters />} />
         <Route path="movies" element={<Movies />} />
         <Route path="screenings" element={<Screenings />} />
+        {/* <Route path="theaters" element={<Theaters />} />
         <Route path="bookings" element={<Bookings />} /> */}
       </Route>
     </Routes>

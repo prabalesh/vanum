@@ -36,6 +36,18 @@ func main() {
 			"version": "1.0.0",
 		})
 	})
+	public := r.Group("/api/v1")
+	{
+		public.GET("/languages", handlers.GetLanguages)
+
+		// Movies
+		public.GET("/movies", handlers.GetAllMovies)
+		public.GET("/movies/:id", handlers.GetMovieByID)
+
+		// Screenings
+		public.GET("/screenings", handlers.GetScreenings)
+		public.GET("/screenings/:id", handlers.GetScreeningByID)
+	}
 
 	adminAPI := r.Group("/api/admin/v1")
 	{
@@ -64,10 +76,24 @@ func main() {
 
 			adminUsersProtected := adminProtected.Group("/users")
 			{
-				adminUsersProtected.GET("/", handlers.GetAllUsers)
+				adminUsersProtected.GET("", handlers.GetAllUsers)
 				adminUsersProtected.POST("/", handlers.CreateUser)
 				adminUsersProtected.PUT("/:id", handlers.UpdateUser)
 				adminUsersProtected.DELETE("/:id", handlers.DeleteUser)
+			}
+
+			adminMoviesProtected := adminProtected.Group("/movies")
+			{
+				adminMoviesProtected.POST("", handlers.CreateMovie)
+				adminMoviesProtected.PUT("/:id", handlers.UpdateMovie)
+				adminMoviesProtected.DELETE("/:id", handlers.DeleteMovie)
+			}
+
+			adminScreeningsProtected := adminProtected.Group("/screenings")
+			{
+				adminScreeningsProtected.POST("", handlers.CreateScreening)
+				adminScreeningsProtected.PUT("/:id", handlers.UpdateScreening)
+				adminScreeningsProtected.DELETE("/:id", handlers.DeleteScreening)
 			}
 
 			adminProtected.GET("/dashboard", func(c *gin.Context) {

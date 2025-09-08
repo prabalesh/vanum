@@ -41,6 +41,12 @@ func Migrate() {
 	err := DB.AutoMigrate(
 		&models.Role{},
 		&models.User{},
+		&models.Language{},
+		&models.Movie{},
+		&models.MovieLanguage{},
+		&models.Screen{},
+		&models.Screening{},
+		&models.Theater{},
 	)
 
 	if err != nil {
