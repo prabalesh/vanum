@@ -85,12 +85,6 @@ export const Login: React.FC = () => {
             Sign In
           </Button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            Default: admin@moviebooking.com / admin123
-          </p>
-        </div>
       </Card>
     </div>
   );
