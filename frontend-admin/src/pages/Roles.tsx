@@ -3,8 +3,8 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRoles } from '../hooks/useRoles';
 import RoleList from '../components/roles/RoleList';
 import RoleFormModal from '../components/roles/RoleFormModal';
-import ConfirmDeleteModal from '../components/roles/ConfirmDeleteModal';
 import type { Role, RoleFormData } from '../types';
+import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 
 export default function Roles() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,10 +93,12 @@ export default function Roles() {
 
       <ConfirmDeleteModal
         isOpen={!!deleteConfirm}
-        role={deleteConfirm}
+        item={deleteConfirm}
+        itemName={deleteConfirm?.name || ''}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={handleDeleteRole}
       />
+
     </div>
   );
 }

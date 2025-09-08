@@ -1,18 +1,25 @@
+// components/shared/ConfirmDeleteModal.tsx
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import type { Role } from '../../types';
 
-interface ConfirmDeleteModalProps {
+interface ConfirmDeleteModalProps<T> {
   isOpen: boolean;
-  role: Role | null;
+  item: T | null;
+  itemName: string;
   onClose: () => void;
-  onConfirm: (role: Role) => Promise<boolean>;
+  onConfirm: (item: T) => Promise<boolean>;
 }
 
-export default function ConfirmDeleteModal({ isOpen, role, onClose, onConfirm }: ConfirmDeleteModalProps) {
+export default function ConfirmDeleteModal<T>({
+  isOpen,
+  item,
+  itemName,
+  onClose,
+  onConfirm,
+}: ConfirmDeleteModalProps<T>) {
   const handleConfirm = async () => {
-    if (role) {
-      const success = await onConfirm(role);
+    if (item) {
+      const success = await onConfirm(item);
       if (success) {
         onClose();
       }
@@ -32,9 +39,9 @@ export default function ConfirmDeleteModal({ isOpen, role, onClose, onConfirm }:
                 </div>
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Delete Role</h3>
+                <h3 className="text-lg font-medium text-gray-900">Delete Confirmation</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Are you sure you want to delete the role "{role?.name}"? This action cannot be undone.
+                  Are you sure you want to delete "{itemName}"? This action cannot be undone.
                 </p>
               </div>
             </div>
@@ -49,7 +56,7 @@ export default function ConfirmDeleteModal({ isOpen, role, onClose, onConfirm }:
                 onClick={handleConfirm}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               >
-                Delete Role
+                Delete
               </button>
             </div>
           </div>
