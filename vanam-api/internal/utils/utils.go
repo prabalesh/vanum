@@ -38,6 +38,22 @@ func SuccessResponse(message string, data interface{}) map[string]interface{} {
 	}
 }
 
+func PaginationResponse(message string, data interface{}, page, limit int, total int64) map[string]interface{} {
+	totalPages := (total + int64(limit) - 1) / int64(limit)
+
+	return map[string]interface{}{
+		"success": true,
+		"message": message,
+		"data":    data,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": totalPages,
+		},
+	}
+}
+
 func ErrorResponse(message string) map[string]interface{} {
 	return map[string]interface{}{
 		"success": false,

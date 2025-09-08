@@ -69,3 +69,24 @@ func AdminLogin(c *gin.Context) {
 		},
 	}))
 }
+
+func AdminLogout(c *gin.Context) {
+	// Get session token from header or cookie
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		token = c.GetHeader("X-Session-Token")
+	}
+
+	if token == "" {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse("Session token required"))
+		return
+	}
+
+	// Remove session from Redis
+	if err := redis.Client.Del(redis.Ctx, "session:"+token).Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to logout"))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.SuccessResponse("Logout successful", nil))
+}

@@ -47,8 +47,29 @@ func main() {
 
 		// All admin routes require authentication and admin role
 		adminProtected := adminAPI.Group("/")
-		adminProtected.Use(middleware.AdminAuthMiddleware())
+		adminProtected.Use(middleware.UserAuthMiddleware())
 		{
+			adminProtected.GET("/profile", handlers.GetUserDetails)
+			adminProtected.POST("/logout", handlers.AdminLogout)
+
+			adminRolesProtected := adminProtected.Group("/roles")
+			{
+				adminRolesProtected.GET("", handlers.GetAllRoles)
+				adminRolesProtected.POST("", handlers.CreateRole)
+				adminRolesProtected.GET("/:id", handlers.GetRoleByID)
+				adminRolesProtected.PUT("/:id", handlers.UpdateRole)
+				adminRolesProtected.DELETE("/:id", handlers.DeleteRole)
+				adminRolesProtected.GET("/:id/users", handlers.GetRoleUsers)
+			}
+
+			adminUsersProtected := adminProtected.Group("/users")
+			{
+				adminUsersProtected.GET("/", handlers.GetAllUsers)
+				adminUsersProtected.POST("/", handlers.CreateUser)
+				adminUsersProtected.PUT("/:id", handlers.UpdateUser)
+				adminUsersProtected.DELETE("/:id", handlers.DeleteUser)
+			}
+
 			adminProtected.GET("/dashboard", func(c *gin.Context) {
 				c.JSON(200, "success")
 			})
