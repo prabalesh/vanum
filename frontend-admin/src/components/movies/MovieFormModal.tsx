@@ -1,20 +1,36 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import type { Movie, MovieFormData } from '../../types';
+import Select from 'react-select';
+import type { Movie, Genre, Person, MovieFormData } from '../../types';
 
 interface MovieFormModalProps {
   isOpen: boolean;
   editingMovie: Movie | null;
+  genres: Genre[];
+  persons: Person[];
   onClose: () => void;
   onCreate: (data: MovieFormData) => Promise<boolean>;
   onUpdate: (id: number, data: MovieFormData) => Promise<boolean>;
 }
 
+interface FormData {
+  original_title: string;
+  duration_minutes: number;
+  release_date: string;
+  rating: string;
+  description: string;
+  poster_url: string;
+  genre_ids: { value: number; label: string }[];
+  cast_ids: { value: number; label: string }[];
+}
+
 export default function MovieFormModal({
   isOpen,
   editingMovie,
+  genres,
+  persons,
   onClose,
   onCreate,
   onUpdate,
@@ -23,21 +39,32 @@ export default function MovieFormModal({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm<MovieFormData>();
+  } = useForm<FormData>();
 
   const handleClose = () => {
     reset();
     onClose();
   };
 
-  const onSubmit = async (data: MovieFormData) => {
-    let success = false;
+  const onSubmit = async (data: FormData) => {
+    const formData: MovieFormData = {
+      original_title: data.original_title,
+      duration_minutes: data.duration_minutes,
+      release_date: data.release_date,
+      rating: data.rating,
+      description: data.description,
+      poster_url: data.poster_url,
+      genre_ids: data.genre_ids.map(g => g.value),
+      cast_ids: data.cast_ids.map(c => c.value),
+    };
 
+    let success = false;
     if (editingMovie) {
-      success = await onUpdate(editingMovie.id, data);
+      success = await onUpdate(editingMovie.id, formData);
     } else {
-      success = await onCreate(data);
+      success = await onCreate(formData);
     }
 
     if (success) {
@@ -52,19 +79,37 @@ export default function MovieFormModal({
         reset({
           original_title: editingMovie.original_title,
           duration_minutes: editingMovie.duration_minutes,
-          release_date: editingMovie.release_date.split('T')[0], // Convert to YYYY-MM-DD
-          genre: editingMovie.genre,
+          release_date: editingMovie.release_date.split('T')[0],
           rating: editingMovie.rating,
-          description: editingMovie.description,
-          poster_url: editingMovie.poster_url,
-          director: editingMovie.director,
-          cast: editingMovie.cast,
+          description: editingMovie.description || '',
+          poster_url: editingMovie.poster_url || '',
+          genre_ids: editingMovie.genres?.map(g => ({ value: g.id, label: g.name })) || [],
+          cast_ids: editingMovie.cast?.map(c => ({ value: c.id, label: c.name })) || [],
         });
       } else {
-        reset();
+        reset({
+          original_title: '',
+          duration_minutes: 0,
+          release_date: '',
+          rating: 'U',
+          description: '',
+          poster_url: '',
+          genre_ids: [],
+          cast_ids: [],
+        });
       }
     }
   }, [isOpen, editingMovie, reset]);
+
+  const genreOptions = genres.map(genre => ({
+    value: genre.id,
+    label: genre.name
+  }));
+
+  const personOptions = persons.map(person => ({
+    value: person.id,
+    label: person.name
+  }));
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
@@ -82,8 +127,11 @@ export default function MovieFormModal({
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
+          
           <form onSubmit={handleSubmit(onSubmit)} className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Movie Title */}
               <div className="md:col-span-2">
                 <label htmlFor="original_title" className="block text-sm font-medium text-gray-700 mb-1">
                   Movie Title <span className="text-red-500">*</span>
@@ -104,6 +152,7 @@ export default function MovieFormModal({
                 )}
               </div>
 
+              {/* Duration */}
               <div>
                 <label htmlFor="duration_minutes" className="block text-sm font-medium text-gray-700 mb-1">
                   Duration (minutes) <span className="text-red-500">*</span>
@@ -124,6 +173,7 @@ export default function MovieFormModal({
                 )}
               </div>
 
+              {/* Release Date */}
               <div>
                 <label htmlFor="release_date" className="block text-sm font-medium text-gray-700 mb-1">
                   Release Date <span className="text-red-500">*</span>
@@ -141,25 +191,55 @@ export default function MovieFormModal({
                 )}
               </div>
 
-              <div>
-                <label htmlFor="genre" className="block text-sm font-medium text-gray-700 mb-1">
-                  Genre
+              {/* Genres Multi-Select */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Genres <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="genre"
-                  {...register('genre')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Genre</option>
-                  <option value="Action">Action</option>
-                  <option value="Comedy">Comedy</option>
-                  <option value="Drama">Drama</option>
-                  <option value="Horror">Horror</option>
-                  <option value="Romance">Romance</option>
-                  <option value="Thriller">Thriller</option>
-                </select>
+                <Controller
+                  name="genre_ids"
+                  control={control}
+                  rules={{ required: 'At least one genre is required' }}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={genreOptions}
+                      isMulti
+                      className="text-sm"
+                      classNamePrefix="select"
+                      placeholder="Select genres..."
+                      closeMenuOnSelect={false}
+                    />
+                  )}
+                />
+                {errors.genre_ids && (
+                  <p className="mt-1 text-sm text-red-600">{errors.genre_ids.message}</p>
+                )}
               </div>
 
+              {/* Cast Multi-Select */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cast
+                </label>
+                <Controller
+                  name="cast_ids"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={personOptions}
+                      isMulti
+                      className="text-sm"
+                      classNamePrefix="select"
+                      placeholder="Select cast members..."
+                      closeMenuOnSelect={false}
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Rating */}
               <div>
                 <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-1">
                   Rating
@@ -169,7 +249,6 @@ export default function MovieFormModal({
                   {...register('rating')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select Rating</option>
                   <option value="U">U</option>
                   <option value="U/A">U/A</option>
                   <option value="A">A</option>
@@ -177,37 +256,7 @@ export default function MovieFormModal({
                 </select>
               </div>
 
-              <div className="md:col-span-2">
-                <label htmlFor="director" className="block text-sm font-medium text-gray-700 mb-1">
-                  Director
-                </label>
-                <input
-                  type="text"
-                  id="director"
-                  {...register('director', {
-                    maxLength: { value: 255, message: 'Director name must be less than 255 characters' },
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Director name"
-                />
-                {errors.director && (
-                  <p className="mt-1 text-sm text-red-600">{errors.director.message}</p>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <label htmlFor="cast" className="block text-sm font-medium text-gray-700 mb-1">
-                  Cast
-                </label>
-                <input
-                  type="text"
-                  id="cast"
-                  {...register('cast')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Main cast members"
-                />
-              </div>
-
+              {/* Poster URL */}
               <div className="md:col-span-2">
                 <label htmlFor="poster_url" className="block text-sm font-medium text-gray-700 mb-1">
                   Poster URL
@@ -226,6 +275,7 @@ export default function MovieFormModal({
                 )}
               </div>
 
+              {/* Description */}
               <div className="md:col-span-2">
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                   Description

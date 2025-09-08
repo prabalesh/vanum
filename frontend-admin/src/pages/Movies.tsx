@@ -13,6 +13,8 @@ export default function Movies() {
 
   const {
     movies,
+    genres,        // Add genres from useMovies hook
+    persons,       // Add persons from useMovies hook
     loading,
     searchTerm,
     genreFilter,
@@ -65,6 +67,7 @@ export default function Movies() {
       {/* Movies List */}
       <MoviesList
         movies={movies}
+        genres={genres}      // Pass genres to MoviesList
         loading={loading}
         searchTerm={searchTerm}
         genreFilter={genreFilter}
@@ -78,6 +81,8 @@ export default function Movies() {
       <MovieFormModal
         isOpen={isModalOpen}
         editingMovie={editingMovie}
+        genres={genres}      // Pass genres to form modal
+        persons={persons}    // Pass persons to form modal
         onClose={handleCloseModal}
         onCreate={createMovie}
         onUpdate={updateMovie}

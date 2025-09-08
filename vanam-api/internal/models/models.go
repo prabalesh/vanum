@@ -7,8 +7,8 @@ import (
 )
 
 type Role struct {
-	ID   uint   `gorm:"primaryKey"`
-	Name string `gorm:"unique;not null"`
+	ID   uint   `json:"id" gorm:"primaryKey"`
+	Name string `json:"name" gorm:"unique;not null"`
 }
 
 type User struct {
@@ -35,25 +35,58 @@ type Session struct {
 	UserAgent string    `json:"user_agent"`
 }
 
+// Genre table
+type Genre struct {
+	ID     uint    `json:"id" gorm:"primaryKey"`
+	Name   string  `json:"name" gorm:"unique;not null"`
+	Movies []Movie `json:"movies" gorm:"many2many:movie_genres;"`
+}
+
+// Person table (actors, directors, etc.)
+type Person struct {
+	ID     uint    `json:"id" gorm:"primaryKey"`
+	Name   string  `json:"name" gorm:"not null"`
+	Bio    string  `json:"bio"`
+	Movies []Movie `json:"movies" gorm:"many2many:movie_cast;"`
+}
+
+// Movie-Person relationship
+type MovieCast struct {
+	MovieID       uint   `gorm:"primaryKey"`
+	PersonID      uint   `gorm:"primaryKey"`
+	Role          string // "Actor", "Director", "Producer"
+	CharacterName string // For actors
+	Movie         Movie
+	Person        Person
+}
+
+type MovieRating string
+
+const (
+	RatingU  MovieRating = "U"
+	RatingUA MovieRating = "U/A"
+	RatingA  MovieRating = "A"
+	RatingS  MovieRating = "S"
+)
+
+// Updated Movie model
 type Movie struct {
 	ID            uint           `json:"id" gorm:"primarykey"`
 	OriginalTitle string         `json:"original_title" gorm:"not null"`
 	Duration      int            `json:"duration_minutes" gorm:"not null"`
-	ReleaseDate   time.Time      `json:"release_date" binding:"required" time_format:"2006-01-02"`
-	Genre         string         `json:"genre"`
-	Rating        string         `json:"rating"`
+	ReleaseDate   time.Time      `json:"release_date"`
+	Rating        MovieRating    `json:"rating"` // Use enum/constants
 	Description   string         `json:"description"`
 	PosterURL     string         `json:"poster_url"`
-	Director      string         `json:"director"`
-	Cast          string         `json:"cast"`
 	IsActive      bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"-" gorm:"index"`
 
-	// Relationships
-	MovieLanguages []MovieLanguage `json:"movie_languages,omitempty"`
-	Screenings     []Screening     `json:"screenings,omitempty"`
+	// Proper relationships
+	Genres     []Genre     `gorm:"many2many:movie_genres;" json:"genres,omitempty"`
+	Cast       []Person    `gorm:"many2many:movie_cast;" json:"cast,omitempty"`
+	Screenings []Screening `json:"screenings,omitempty"`
 }
 
 type Language struct {

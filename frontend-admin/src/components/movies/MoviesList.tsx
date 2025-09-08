@@ -1,9 +1,11 @@
+// components/movies/MoviesList.tsx
 import { FilmIcon } from '@heroicons/react/24/outline';
-import type { Movie } from '../../types';
+import type { Movie, Genre } from '../../types';
 import MovieCard from './MovieCard';
 
 interface MoviesListProps {
   movies: Movie[];
+  genres: Genre[];
   loading: boolean;
   searchTerm: string;
   genreFilter: string;
@@ -15,6 +17,7 @@ interface MoviesListProps {
 
 export default function MoviesList({
   movies,
+  genres,
   loading,
   searchTerm,
   genreFilter,
@@ -51,12 +54,11 @@ export default function MoviesList({
             className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Genres</option>
-            <option value="Action">Action</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Drama">Drama</option>
-            <option value="Horror">Horror</option>
-            <option value="Romance">Romance</option>
-            <option value="Thriller">Thriller</option>
+            {genres.map((genre) => (
+              <option key={genre.id} value={genre.id}>
+                {genre.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -84,7 +84,7 @@ export default function UserFormModal({
           name: editingUser.name,
           email: editingUser.email,
           password: '', // Always empty for edit
-          role_id: editingUser.role.ID,
+          role_id: editingUser.role.id,
           is_active: editingUser.is_active,
         });
       } else {

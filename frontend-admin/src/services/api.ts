@@ -4,6 +4,7 @@ import type {
     ApiResponse,
   CreateUserFormData,
   GeneralUser,
+  Genre,
   Language,
   Movie,
   MovieFormData,
@@ -226,3 +227,10 @@ export const languagesApi = {
     return response.data;
   },
 };
+
+export const genreApi = {
+  getAll: async (): Promise<ApiResponse<Genre[]>> => {
+    const response = await public_api.get('/genres');
+    return response.data;
+  },
+}

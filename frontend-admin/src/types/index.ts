@@ -21,7 +21,7 @@ export interface GeneralUser {
   name: string;
   is_active: boolean;
   email: string;
-  role: {ID: number; Name: String;}
+  role: Role
   created_at?: string;
   updated_at?: string;
 }
@@ -41,23 +41,44 @@ export interface UpdateUserFormData {
   is_active?: boolean;
 }
 
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface Person {
+  id: number;
+  name: string;
+  bio: string;
+  movies: Movie[]
+}
+
 export interface Movie {
   id: number;
   original_title: string;
   duration_minutes: number;
   release_date: string;
-  genre: string;
   rating: string;
-  description: string;
-  poster_url: string;
-  director: string;
-  cast: string;
+  description?: string;
+  poster_url?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  movie_languages?: MovieLanguage[];
-  screenings?: Screening[];
+  genres?: Genre[];
+  cast?: Person[];
 }
+
+export interface MovieFormData {
+  original_title: string;
+  duration_minutes: number;
+  release_date: string;
+  rating: string;
+  description: string;
+  poster_url: string;
+  genre_ids: number[];
+  cast_ids: number[];
+}
+
 
 export interface Language {
   id: number;
@@ -115,18 +136,6 @@ export interface Screening {
   screen: Screen;
   language: Language;
   subtitle_language?: Language;
-}
-
-export interface MovieFormData {
-  original_title: string;
-  duration_minutes: number;
-  release_date: string;
-  genre: string;
-  rating: string;
-  description: string;
-  poster_url: string;
-  director: string;
-  cast: string;
 }
 
 export interface ScreeningFormData {

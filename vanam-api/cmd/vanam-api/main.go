@@ -40,6 +40,8 @@ func main() {
 	{
 		public.GET("/languages", handlers.GetLanguages)
 
+		public.GET("/genres", handlers.GetAllGenres)
+
 		// Movies
 		public.GET("/movies", handlers.GetAllMovies)
 		public.GET("/movies/:id", handlers.GetMovieByID)
@@ -47,6 +49,7 @@ func main() {
 		// Screenings
 		public.GET("/screenings", handlers.GetScreenings)
 		public.GET("/screenings/:id", handlers.GetScreeningByID)
+
 	}
 
 	adminAPI := r.Group("/api/admin/v1")
@@ -80,6 +83,22 @@ func main() {
 				adminUsersProtected.POST("/", handlers.CreateUser)
 				adminUsersProtected.PUT("/:id", handlers.UpdateUser)
 				adminUsersProtected.DELETE("/:id", handlers.DeleteUser)
+			}
+
+			// Genre management
+			genreGroup := adminProtected.Group("/genres")
+			{
+				genreGroup.POST("", handlers.CreateGenre)
+				genreGroup.PUT("/:id", handlers.UpdateGenre)
+				genreGroup.DELETE("/:id", handlers.DeleteGenre)
+			}
+
+			// Language management
+			languageGroup := adminProtected.Group("/languages")
+			{
+				languageGroup.POST("", handlers.CreateLanguage)
+				languageGroup.PUT("/:id", handlers.UpdateLanguage)
+				languageGroup.DELETE("/:id", handlers.DeleteLanguage)
 			}
 
 			adminMoviesProtected := adminProtected.Group("/movies")

@@ -1,16 +1,45 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { moviesApi } from '../services/api';
-import type { Movie, MovieFormData } from '../types';
+import { genreApi, moviesApi } from '../services/api';
+import type { Movie, Genre, Person, MovieFormData } from '../types';
 
 export const useMovies = (limit = 10) => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalMovies, setTotalMovies] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('');
+
+  // Fetch genres for dropdown
+  const fetchGenres = async () => {
+    try {
+      const response = await genreApi.getAll();
+      
+      if(response.success) {
+        setGenres(response.data);
+      }
+      
+    } catch (error) {
+      console.error('Failed to fetch genres', error);
+    }
+  };
+
+  // Fetch persons (cast) for dropdown
+  const fetchPersons = async () => {
+    // try {
+    //   const response = await fetch('/api/v1/persons?limit=100');
+    //   const data = await response.json();
+    //   if (data.success) {
+    //     setPersons(data.data);
+    //   }
+    // } catch (error) {
+    //   console.error('Failed to fetch persons', error);
+    // }
+  };
 
   // Fetch movies
   const fetchMovies = async (page = 1) => {
@@ -31,11 +60,18 @@ export const useMovies = (limit = 10) => {
     }
   };
 
+  // Load reference data once
+  useEffect(() => {
+    fetchGenres();
+    fetchPersons();
+  }, []);
+
+  // Reload movies when filters change
   useEffect(() => {
     fetchMovies(currentPage);
   }, [currentPage, searchTerm, genreFilter]);
 
-  // Create movie
+  // Create movie with genre_ids and cast_ids
   const createMovie = async (data: MovieFormData) => {
     try {
       const preparedData = {
@@ -95,6 +131,8 @@ export const useMovies = (limit = 10) => {
 
   return {
     movies,
+    genres,        // Add genres for dropdowns
+    persons,       // Add persons for cast selection
     loading,
     currentPage,
     totalPages,
