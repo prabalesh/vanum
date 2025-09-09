@@ -6,6 +6,7 @@ import type {
   GeneralUser,
   Genre,
   Language,
+  LanguageFormData,
   Movie,
   MovieFormData,
   PaginatedResponse,
@@ -38,8 +39,10 @@ const public_api = axios.create({
 // Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
+    console.log("yes")
     const token = localStorage.getItem("token");
     if (token) {
+      console.log("double yes")
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -226,6 +229,18 @@ export const languagesApi = {
     const response = await public_api.get('/languages');
     return response.data;
   },
+  create: async(movie_id: number, data: LanguageFormData): Promise<{success: boolean}> => {
+    const response = await api.post(`/movies/${movie_id}/languages`, data);
+    return response.data;
+  },
+  update: async(movie_id: number, language_id: number, data: LanguageFormData): Promise<{success: boolean}> => {
+    const response = await api.put(`/movies/${movie_id}/languages/${language_id}`, data);
+    return response.data;
+  },
+  delete: async(movie_id: number, language_id: number): Promise<{success: boolean}> => {
+    const response = await api.delete(`/movies/${movie_id}/languages/${language_id}`);
+    return response.data;
+  }
 };
 
 export const genreApi = {

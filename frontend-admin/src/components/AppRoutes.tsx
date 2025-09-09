@@ -7,6 +7,7 @@ import Roles from "../pages/Roles";
 import Users from "../pages/Users";
 import Movies from "../pages/Movies";
 import Screenings from "../pages/Screenings";
+import MovieDetail from "./movies/MovieDetail";
 
 export default function AppRoutes() {
     return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         <Route path="roles" element={<Roles />} />
         <Route path="users" element={<Users />} />
         <Route path="movies" element={<Movies />} />
+        <Route path="movies/:id" element={<MovieDetail />} />
         <Route path="screenings" element={<Screenings />} />
         {/* <Route path="theaters" element={<Theaters />} />
         <Route path="bookings" element={<Bookings />} /> */}

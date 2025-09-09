@@ -66,6 +66,7 @@ export interface Movie {
   updated_at: string;
   genres?: Genre[];
   cast?: Person[];
+  movie_languages: MovieLanguage[];
 }
 
 export interface MovieFormData {
@@ -94,6 +95,21 @@ export interface MovieLanguage {
   title: string;
   description: string;
   language: Language;
+
+  has_audio: boolean;
+  has_subtitles: boolean;
+  audio_format: string;
+  subtitle_format: string;
+}
+
+export interface LanguageFormData {
+  language_id: number;
+  title: string;
+  description: string;
+  has_audio: boolean;
+  has_subtitles: boolean;
+  audio_format: string;
+  subtitle_format: string;
 }
 
 export interface Theater {

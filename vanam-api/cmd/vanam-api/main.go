@@ -106,6 +106,13 @@ func main() {
 				adminMoviesProtected.POST("", handlers.CreateMovie)
 				adminMoviesProtected.PUT("/:id", handlers.UpdateMovie)
 				adminMoviesProtected.DELETE("/:id", handlers.DeleteMovie)
+				adminMoviesProtected.GET("/:id/languages", handlers.GetMovieLanguages)
+				adminMoviesProtected.POST("/:id/languages", handlers.AddMovieLanguage)
+				adminMoviesProtected.PUT("/:id/languages/:langId", handlers.UpdateMovieLanguage)
+				adminMoviesProtected.DELETE("/:id/languages/:langId", handlers.RemoveMovieLanguage)
+
+				// Get movie in specific language
+				adminMoviesProtected.GET("/:id", handlers.GetMovieByID) // Supports ?lang=hi parameter
 			}
 
 			adminScreeningsProtected := adminProtected.Group("/screenings")

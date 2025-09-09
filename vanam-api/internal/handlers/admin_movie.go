@@ -159,9 +159,11 @@ func GetAllMovies(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.PaginationResponse("Movies retrieved successfully", movies, page, limit, total))
 }
 
-// GetMovieByID - Get movie by ID with all associations
+// Update existing GetMovieByID handler
 func GetMovieByID(c *gin.Context) {
 	movieID := c.Param("id")
+	preferredLang := c.Query("lang") // Optional language parameter
+
 	id, err := strconv.Atoi(movieID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid movie ID"))
@@ -169,20 +171,26 @@ func GetMovieByID(c *gin.Context) {
 	}
 
 	var movie models.Movie
-	err = database.DB.
+	query := database.DB.
 		Preload("Genres").
 		Preload("Cast").
 		Preload("MovieLanguages.Language").
-		Preload("Screenings").
-		First(&movie, id).Error
+		Preload("Screenings")
 
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, utils.ErrorResponse("Movie not found"))
-			return
-		}
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Database error"))
+	if err := query.First(&movie, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse("Movie not found"))
 		return
+	}
+
+	// If specific language requested, prioritize localized content
+	if preferredLang != "" {
+		for _, ml := range movie.MovieLanguages {
+			if ml.Language.Code == preferredLang {
+				movie.OriginalTitle = ml.Title
+				movie.Description = ml.Description
+				break
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, utils.SuccessResponse("Movie retrieved successfully", movie))

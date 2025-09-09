@@ -1,4 +1,5 @@
 // components/movies/MovieCard.tsx
+import { useNavigate } from 'react-router-dom';
 import {
   PencilIcon,
   TrashIcon,
@@ -14,14 +15,40 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie, onEdit, onDelete }: MovieCardProps) {
+  const navigate = useNavigate();
+  
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
   };
 
+  // Handle card click to navigate to details
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if user clicked on edit/delete buttons
+    if (e.target instanceof Element && 
+        (e.target.closest('button') || e.target.tagName === 'BUTTON')) {
+      return;
+    }
+    navigate(`/movies/${movie.id}`);
+  };
+
+  // Handle button clicks to prevent event bubbling
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(movie);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(movie);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="aspect-w-2 aspect-h-3">
         <img
           src={movie.poster_url || '/placeholder-poster.jpg'}
@@ -45,20 +72,22 @@ export default function MovieCard({ movie, onEdit, onDelete }: MovieCardProps) {
         {/* Display multiple genres */}
         <div className="mb-2">
           <div className="flex flex-wrap gap-1">
-            {movie.genres == null || movie.genres.length == 0 ? (
-              <p>No genres available</p>
-            ): (<>
-              {movie.genres?.slice(0, 2).map((genre) => (
-                <span
-                  key={genre.id}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </>)}
-            {movie.genres && movie.genres.length > 2 && (
-              <span className="text-xs text-gray-500">+{movie.genres.length - 2} more</span>
+            {movie.genres && movie.genres.length > 0 ? (
+              <>
+                {movie.genres.slice(0, 2).map((genre) => (
+                  <span
+                    key={genre.id}
+                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    {genre.name}
+                  </span>
+                ))}
+                {movie.genres.length > 2 && (
+                  <span className="text-xs text-gray-500">+{movie.genres.length - 2} more</span>
+                )}
+              </>
+            ) : (
+              <span className="text-xs text-gray-500 italic">No genres available</span>
             )}
           </div>
         </div>
@@ -79,14 +108,14 @@ export default function MovieCard({ movie, onEdit, onDelete }: MovieCardProps) {
           </span>
           <div className="flex space-x-2">
             <button
-              onClick={() => onEdit(movie)}
+              onClick={handleEditClick}
               className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-colors"
               title="Edit movie"
             >
               <PencilIcon className="h-4 w-4" />
             </button>
             <button
-              onClick={() => onDelete(movie)}
+              onClick={handleDeleteClick}
               className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-colors"
               title="Delete movie"
             >

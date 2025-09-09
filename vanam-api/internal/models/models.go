@@ -87,6 +87,9 @@ type Movie struct {
 	Genres     []Genre     `gorm:"many2many:movie_genres;" json:"genres,omitempty"`
 	Cast       []Person    `gorm:"many2many:movie_cast;" json:"cast,omitempty"`
 	Screenings []Screening `json:"screenings,omitempty"`
+
+	MovieLanguages     []MovieLanguage `json:"movie_languages,omitempty"`
+	AvailableLanguages []Language      `json:"available_languages,omitempty" gorm:"many2many:movie_languages;"`
 }
 
 type Language struct {
@@ -94,18 +97,25 @@ type Language struct {
 	Code       string    `json:"code" gorm:"uniqueIndex;not null"`
 	Name       string    `json:"name" gorm:"not null"`
 	NativeName string    `json:"native_name"`
+	IsActive   bool      `json:"is_active" gorm:"default:true"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type MovieLanguage struct {
-	ID          uint      `json:"id" gorm:"primarykey"`
-	MovieID     uint      `json:"movie_id" gorm:"not null"`
-	LanguageID  uint      `json:"language_id" gorm:"not null"`
-	Title       string    `json:"title" gorm:"not null"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          uint   `json:"id" gorm:"primarykey"`
+	MovieID     uint   `json:"movie_id" gorm:"not null"`
+	LanguageID  uint   `json:"language_id" gorm:"not null"`
+	Title       string `json:"title" gorm:"not null"`
+	Description string `json:"description"`
+
+	HasAudio       bool   `json:"has_audio" gorm:"default:false"`     // Audio track available
+	HasSubtitles   bool   `json:"has_subtitles" gorm:"default:false"` // Subtitles available
+	AudioFormat    string `json:"audio_format"`                       // "Dolby Atmos", "Stereo"
+	SubtitleFormat string `json:"subtitle_format"`                    // "SRT", "VTT"
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relationships
 	Movie    Movie    `json:"movie,omitempty"`
