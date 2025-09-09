@@ -38,6 +38,13 @@ func main() {
 	})
 	public := r.Group("/api/v1")
 	{
+		// Public routes
+		theaterPublic := public.Group("/theaters")
+		{
+			theaterPublic.GET("", handlers.GetTheaters)        // GET /api/v1/theaters
+			theaterPublic.GET("/:id", handlers.GetTheaterByID) // GET /api/v1/theaters/:id
+		}
+
 		public.GET("/languages", handlers.GetLanguages)
 
 		public.GET("/genres", handlers.GetAllGenres)
@@ -113,6 +120,14 @@ func main() {
 
 				// Get movie in specific language
 				adminMoviesProtected.GET("/:id", handlers.GetMovieByID) // Supports ?lang=hi parameter
+			}
+
+			theaterAdmin := adminProtected.Group("/theaters")
+			{
+				theaterAdmin.POST("", handlers.CreateTheater)                   // POST /api/admin/v1/theaters
+				theaterAdmin.PUT("/:id", handlers.UpdateTheater)                // PUT /api/admin/v1/theaters/:id
+				theaterAdmin.DELETE("/:id", handlers.DeleteTheater)             // DELETE /api/admin/v1/theaters/:id
+				theaterAdmin.PATCH("/:id/toggle", handlers.ToggleTheaterStatus) // PATCH /api/admin/v1/theaters/:id/toggle
 			}
 
 			adminScreeningsProtected := adminProtected.Group("/screenings")

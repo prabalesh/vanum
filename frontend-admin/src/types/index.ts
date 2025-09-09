@@ -119,16 +119,16 @@ export interface Theater {
   city: string;
   state: string;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
   screens?: Screen[];
 }
 
 export interface Screen {
   id: number;
-  theater_id: number;
   name: string;
-  total_seats: number;
-  screen_type: string;
-  theater?: Theater;
+  theater_id: number;
+  capacity?: number;
 }
 
 export interface Screening {

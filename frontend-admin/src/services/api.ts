@@ -14,6 +14,7 @@ import type {
   RoleFormData,
   Screening,
   ScreeningFormData,
+  Theater,
   UpdateUserFormData,
   User,
 } from "../types";
@@ -249,3 +250,48 @@ export const genreApi = {
     return response.data;
   },
 }
+
+export const theatersApi = {
+  getAll: async (params?: { 
+    page?: number; 
+    limit?: number; 
+    city?: string; 
+    state?: string; 
+    is_active?: boolean 
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.city) searchParams.append('city', params.city);
+    if (params?.state) searchParams.append('state', params.state);
+    if (params?.is_active !== undefined) searchParams.append('is_active', params.is_active.toString());
+
+    const response = await public_api.get(`/theaters?${searchParams.toString()}`);
+    return response.data;
+  },
+
+  getById: async (id: number) => {
+    const response = await public_api.get(`/theaters/${id}`);
+    return response.data;
+  },
+
+  create: async (data: Omit<Theater, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await api.post('/theaters', data);
+    return response.data;
+  },
+
+  update: async (id: number, data: Partial<Theater>) => {
+    const response = await api.put(`/theaters/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number) => {
+    const response = await api.delete(`/theaters/${id}`);
+    return response.data;
+  },
+
+  toggleStatus: async (id: number) => {
+    const response = await api.patch(`/theaters/${id}/toggle`);
+    return response.data;
+  }
+};

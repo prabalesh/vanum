@@ -8,6 +8,8 @@ import Users from "../pages/Users";
 import Movies from "../pages/Movies";
 import Screenings from "../pages/Screenings";
 import MovieDetail from "./movies/MovieDetail";
+import Theaters from "../pages/Theaters";
+import TheaterDetail from "../pages/TheaterDetail";
 
 export default function AppRoutes() {
     return (
@@ -27,8 +29,9 @@ export default function AppRoutes() {
         <Route path="movies" element={<Movies />} />
         <Route path="movies/:id" element={<MovieDetail />} />
         <Route path="screenings" element={<Screenings />} />
-        {/* <Route path="theaters" element={<Theaters />} />
-        <Route path="bookings" element={<Bookings />} /> */}
+        <Route path="theaters" element={<Theaters />} />
+        <Route path="theaters/:id" element={<TheaterDetail />} />
+        {/*<Route path="bookings" element={<Bookings />} /> */}
       </Route>
     </Routes>
   );
