@@ -138,6 +138,18 @@ export interface Screen {
   seats?: Seat[];
 }
 
+export interface ScreenCreatFormData  {
+  name: string;
+  seat_layout: SeatLayoutConfig;
+  is_active?: boolean;
+}
+
+export interface ScreenUpdateFormData  {
+  name: string;
+  seat_layout: SeatLayoutConfig;
+  is_active?: boolean;
+}
+
 // types/index.ts
 export interface Seat {
   id: number;

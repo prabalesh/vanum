@@ -12,10 +12,10 @@ import type {
   PaginatedResponse,
   Role,
   RoleFormData,
-  Screen,
+  ScreenCreatFormData,
   Screening,
   ScreeningFormData,
-  SeatLayoutConfig,
+  ScreenUpdateFormData,
   Theater,
   UpdateUserFormData,
   User,
@@ -310,11 +310,7 @@ export const screensApi = {
     return response.data;
   },
 
-  create: async (theaterId: number, data: {
-    name: string;
-    seat_layout: SeatLayoutConfig;
-    is_active?: boolean;
-  }) => {
+  create: async (theaterId: number, data: ScreenCreatFormData) => {
     const response = await api.post(`/theaters/${theaterId}/screens`, {
       ...data,
       theater_id: theaterId
@@ -322,7 +318,7 @@ export const screensApi = {
     return response.data;
   },
 
-  update: async (id: number, data: Partial<Screen>) => {
+  update: async (id: number, data: Partial<ScreenUpdateFormData>) => {
     const response = await api.put(`/screens/${id}`, data);
     return response.data;
   },
