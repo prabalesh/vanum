@@ -38,10 +38,10 @@ export default function SeatLayoutDesigner({ layout, onChange }: SeatLayoutDesig
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
   // === COMPUTED VALUES ===
-  const duplicateAnalysis = useMemo(() => 
-    LayoutValidationService.analyzeDuplicates(layout.layout), 
-    [layout.layout]
-  );
+  const duplicateAnalysis = useMemo(() => {
+  console.log('Re-analyzing duplicates...', layout.layout); // Debug log
+  return LayoutValidationService.analyzeDuplicates(layout.layout);
+}, [layout.layout, layout.rows, layout.columns]); // Add more dependencies
 
   const statistics = useMemo(() => 
     LayoutValidationService.calculateStatistics(layout.layout), 
@@ -50,79 +50,152 @@ export default function SeatLayoutDesigner({ layout, onChange }: SeatLayoutDesig
 
   // === EVENT HANDLERS ===
   const handleSeatClick = useCallback((rowIndex: number, colIndex: number) => {
-    const newLayout = { ...layout };
-    
-    if (!newLayout.layout || newLayout.layout.length === 0) {
-      newLayout.layout = LayoutFactory.createInitialLayout(layout.rows, layout.columns);
+  console.log('Seat single-clicked:', rowIndex, colIndex); // Debug log
+  
+  const newLayout = { ...layout };
+  
+  if (!newLayout.layout || newLayout.layout.length === 0) {
+    newLayout.layout = LayoutFactory.createInitialLayout(layout.rows, layout.columns);
+  }
+
+  const currentSeat = newLayout.layout[rowIndex]?.[colIndex] || 
+    LayoutFactory.createDefaultSeat(rowIndex, colIndex);
+
+  const newType = selectedTool as SeatPosition['type'];
+  const seatTypeInfo = SEAT_TYPES[newType];
+  
+  // Only change type if it's different from current type
+  if (currentSeat.type === newType) {
+    console.log('Same type selected, no change needed');
+    return;
+  }
+  
+  // Update the seat
+  newLayout.layout[rowIndex][colIndex] = {
+    ...currentSeat,
+    type: newType,
+    number: '',
+    row: '',
+    price: seatTypeInfo?.price || 0,
+    is_accessible: seatTypeInfo?.is_accessible || false,
+  };
+
+  // Regenerate numbers for the entire row
+  newLayout.layout[rowIndex] = newLayout.layout[rowIndex].map((seat, colIdx) => {
+    if (isSeat(seat.type)) {
+      return {
+        ...seat,
+        number: seat.custom_number || SeatNumberingService.generateSeatNumber(
+          rowIndex, colIdx, newLayout.layout!, numberingScheme, rowNaming, customRowNames
+        ),
+        row: SeatNumberingService.generateRowName(rowIndex, newLayout.layout!, rowNaming, customRowNames),
+      };
     }
+    return { ...seat, number: '', row: '' };
+  });
 
-    const currentSeat = newLayout.layout[rowIndex]?.[colIndex] || 
-      LayoutFactory.createDefaultSeat(rowIndex, colIndex);
-
-    const newType = selectedTool as SeatPosition['type'];
-    const seatTypeInfo = SEAT_TYPES[newType];
-    
-    // Update the seat
-    newLayout.layout[rowIndex][colIndex] = {
-      ...currentSeat,
-      type: newType,
-      number: '',
-      row: '',
-      price: seatTypeInfo?.price || 0,
-      is_accessible: seatTypeInfo?.is_accessible || false,
-    };
-
-    // Regenerate numbers for the entire row
-    newLayout.layout[rowIndex] = newLayout.layout[rowIndex].map((seat, colIdx) => {
-      if (isSeat(seat.type)) {
-        return {
-          ...seat,
-          number: seat.custom_number || SeatNumberingService.generateSeatNumber(
-            rowIndex, colIdx, newLayout.layout!, numberingScheme, rowNaming, customRowNames
-          ),
-          row: SeatNumberingService.generateRowName(rowIndex, newLayout.layout!, rowNaming, customRowNames),
-        };
-      }
-      return { ...seat, number: '', row: '' };
-    });
-
-    onChange(newLayout);
-  }, [selectedTool, layout, numberingScheme, rowNaming, customRowNames, onChange]);
+  onChange(newLayout);
+}, [selectedTool, layout, numberingScheme, rowNaming, customRowNames, onChange]);
 
   const handleEditSeatNumber = useCallback((rowIndex: number, colIndex: number) => {
-    const seat = layout.layout?.[rowIndex]?.[colIndex];
-    if (seat && isSeat(seat.type)) {
-      setEditingSeat({ row: rowIndex, col: colIndex });
-    }
-  }, [layout.layout]);
+  console.log('Edit seat clicked:', rowIndex, colIndex); // Debug log
+  
+  const seat = layout.layout?.[rowIndex]?.[colIndex];
+  console.log('Seat data:', seat); // Debug log
+  
+  if (seat && isSeat(seat.type)) {
+    console.log('Setting editing seat:', { row: rowIndex, col: colIndex }); // Debug log
+    setEditingSeat({ row: rowIndex, col: colIndex });
+  } else {
+    console.log('Cannot edit this seat type:', seat?.type); // Debug log
+  }
+}, [layout.layout]);
 
-  const handleSaveCustomNumber = useCallback((customNumber: string): boolean => {
-    if (!editingSeat) return false;
-    
-    const trimmedNumber = customNumber.trim();
-    
-    if (!LayoutValidationService.validateSeatNumber(
-      trimmedNumber, 
-      editingSeat.row, 
-      editingSeat.col,
-      layout.layout,
-      duplicateAnalysis.seatNumberCounts
-    )) {
-      return false;
-    }
-    
-    const newLayout = { ...layout };
-    const seat = newLayout.layout[editingSeat.row][editingSeat.col];
-    
-    seat.custom_number = trimmedNumber;
-    seat.number = trimmedNumber || SeatNumberingService.generateSeatNumber(
-      editingSeat.row, editingSeat.col, newLayout.layout!, numberingScheme, rowNaming, customRowNames
-    );
-    
-    onChange(newLayout);
-    setEditingSeat(null);
-    return true;
-  }, [editingSeat, layout, duplicateAnalysis.seatNumberCounts, numberingScheme, rowNaming, customRowNames, onChange]);
+  const handleSaveCustomNumber = useCallback(async (customNumber: string): Promise<boolean> => {
+  if (!editingSeat) return false;
+  
+  const trimmedNumber = customNumber.trim();
+  console.log('Saving custom number:', trimmedNumber, 'for seat:', editingSeat); // Debug
+  
+  if (!trimmedNumber) return false;
+  
+  // Format validation
+  if (!/^[A-Z0-9-]+$/i.test(trimmedNumber) || trimmedNumber.length > 10) {
+    return false;
+  }
+  
+  // Create a completely new layout object to trigger re-renders
+  const newLayout = JSON.parse(JSON.stringify(layout)); // Deep clone
+  
+  if (!newLayout.layout || !newLayout.layout[editingSeat.row]) return false;
+  
+  // Update the specific seat
+  newLayout.layout[editingSeat.row][editingSeat.col] = {
+    ...newLayout.layout[editingSeat.row][editingSeat.col],
+    custom_number: trimmedNumber,
+    number: trimmedNumber
+  };
+  
+  console.log('Updated layout:', newLayout.layout[editingSeat.row][editingSeat.col]); // Debug
+  
+  // Force state update
+  onChange(newLayout);
+  setEditingSeat(null);
+  
+  // Small delay to ensure state has updated before closing modal
+  setTimeout(() => {
+    console.log('Seat number save completed'); // Debug
+  }, 100);
+  
+  return true;
+}, [editingSeat, layout, onChange]);
+
+
+
+
+const validateSeatNumber = useCallback((newNumber: string): { isValid: boolean; error?: string } => {
+  if (!newNumber.trim()) {
+    return { isValid: false, error: 'Seat number cannot be empty' };
+  }
+  
+  const trimmed = newNumber.trim();
+  
+  if (!editingSeat) {
+    return { isValid: false, error: 'No seat selected for editing' };
+  }
+  
+  const currentSeat = layout.layout?.[editingSeat.row]?.[editingSeat.col];
+  
+  // Allow if it's the same number (no change)
+  if (trimmed === currentSeat?.number) {
+    return { isValid: true };
+  }
+  
+  // Check if number already exists
+  if (duplicateAnalysis.seatNumberCounts[trimmed]) {
+    return { 
+      isValid: false, 
+      error: `Seat number "${trimmed}" is already used by another seat` 
+    };
+  }
+  
+  // Format validation
+  if (!/^[A-Z0-9-]+$/i.test(trimmed)) {
+    return { 
+      isValid: false, 
+      error: 'Use only letters, numbers, and hyphens' 
+    };
+  }
+  
+  if (trimmed.length > 10) {
+    return { 
+      isValid: false, 
+      error: 'Maximum 10 characters allowed' 
+    };
+  }
+  
+  return { isValid: true };
+}, [editingSeat, layout.layout, duplicateAnalysis.seatNumberCounts]);
 
   const handleRowSelection = useCallback((rowIndex: number) => {
     const newSelected = new Set(selectedRows);
@@ -185,8 +258,20 @@ export default function SeatLayoutDesigner({ layout, onChange }: SeatLayoutDesig
   // Other methods... (validation, effects, etc.)
 
   const isSeatDuplicate = useCallback((rowIndex: number, colIndex: number): boolean => {
-    return duplicateAnalysis.duplicatePositions.has(`${rowIndex}-${colIndex}`);
-  }, [duplicateAnalysis.duplicatePositions]);
+  const key = `${rowIndex}-${colIndex}`;
+  const isDupe = duplicateAnalysis.duplicatePositions.has(key);
+  
+  // Debug log
+  const seat = layout.layout?.[rowIndex]?.[colIndex];
+  console.log(`Checking duplicate for ${key}:`, {
+    isDupe,
+    seatNumber: seat?.number,
+    allDuplicatePositions: Array.from(duplicateAnalysis.duplicatePositions),
+    duplicateNumbers: duplicateAnalysis.duplicateNumbers
+  });
+  
+  return isDupe;
+}, [duplicateAnalysis.duplicatePositions, duplicateAnalysis.duplicateNumbers, layout.layout]);
 
   // === EFFECTS ===
   useEffect(() => {
@@ -262,26 +347,30 @@ export default function SeatLayoutDesigner({ layout, onChange }: SeatLayoutDesig
         />
       </div>
 
-      <SeatGrid
-        layout={layout}
-        selectedRows={selectedRows}
-        rowNaming={rowNaming}
-        customRowNames={customRowNames}
-        isDuplicate={isSeatDuplicate}
-        onSeatClick={handleSeatClick}
-        onSeatDoubleClick={handleEditSeatNumber}
-        onRowSelect={handleRowSelection}
-        onRowToggle={toggleRowWalkway}
-      />
+<SeatGrid
+  key={`${layout.rows}-${layout.columns}-${JSON.stringify(duplicateAnalysis.duplicateNumbers)}`} // Force re-render
+  layout={layout}
+  selectedRows={selectedRows}
+  rowNaming={rowNaming}
+  customRowNames={customRowNames}
+  isDuplicate={isSeatDuplicate}
+  onSeatClick={handleSeatClick}
+  onSeatEdit={handleEditSeatNumber}
+  onRowSelect={handleRowSelection}
+  onRowToggle={toggleRowWalkway}
+/>
 
       <SeatNumberEditor
-        isOpen={!!editingSeat}
-        currentNumber={editingSeat ? 
-          layout.layout?.[editingSeat.row]?.[editingSeat.col]?.custom_number || 
-          layout.layout?.[editingSeat.row]?.[editingSeat.col]?.number || '' : ''}
-        onSave={handleSaveCustomNumber}
-        onCancel={() => setEditingSeat(null)}
-      />
+  isOpen={!!editingSeat}
+  currentNumber={editingSeat ? 
+    layout.layout?.[editingSeat.row]?.[editingSeat.col]?.number || '' : ''}
+  seatPosition={editingSeat}
+  onSave={handleSaveCustomNumber}
+  onCancel={() => setEditingSeat(null)}
+  duplicateNumbers={duplicateAnalysis.duplicateNumbers}
+  allowDuplicatesInDesign={true} // Enable design mode
+/>
+
 
       <SeatTypesLegend />
     </div>

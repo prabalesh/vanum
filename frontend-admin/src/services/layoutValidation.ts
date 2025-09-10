@@ -15,7 +15,9 @@ export interface LayoutStatistics {
 
 export class LayoutValidationService {
   static analyzeDuplicates(layout: SeatPosition[][] | undefined): DuplicateAnalysis {
-    if (!layout) {
+    console.log('Analyzing layout for duplicates:', layout); // Debug
+    
+    if (!layout || layout.length === 0) {
       return { 
         duplicateNumbers: [], 
         seatNumberCounts: {}, 
@@ -24,37 +26,49 @@ export class LayoutValidationService {
     }
 
     const counts: Record<string, number> = {};
-    const duplicates: string[] = [];
-    const positions = new Set<string>();
+    const positions: Record<string, Array<{row: number, col: number}>> = {};
     
-    // Count seat numbers
+    // Count all seat numbers and track their positions
     layout.forEach((row, rowIndex) => {
+      if (!row) return;
       row.forEach((seat, colIndex) => {
-        if (seat?.number && isSeat(seat.type)) {
-          counts[seat.number] = (counts[seat.number] || 0) + 1;
+        if (seat?.number && isSeat(seat.type) && seat.number.trim()) {
+          const seatNumber = seat.number.trim();
+          counts[seatNumber] = (counts[seatNumber] || 0) + 1;
+          
+          if (!positions[seatNumber]) {
+            positions[seatNumber] = [];
+          }
+          positions[seatNumber].push({ row: rowIndex, col: colIndex });
         }
       });
     });
     
-    // Find duplicates and their positions
+    // Find duplicates
+    const duplicates: string[] = [];
+    const duplicatePositions = new Set<string>();
+    
     Object.entries(counts).forEach(([number, count]) => {
       if (count > 1) {
         duplicates.push(number);
         
-        layout.forEach((row, rowIndex) => {
-          row.forEach((seat, colIndex) => {
-            if (seat?.number === number && isSeat(seat.type)) {
-              positions.add(`${rowIndex}-${colIndex}`);
-            }
-          });
+        // Mark all positions with this duplicate number
+        positions[number]?.forEach(({ row, col }) => {
+          duplicatePositions.add(`${row}-${col}`);
         });
       }
     });
     
+    console.log('Duplicate analysis result:', { 
+      duplicates, 
+      counts, 
+      duplicatePositions: Array.from(duplicatePositions) 
+    }); // Debug
+    
     return { 
       duplicateNumbers: duplicates, 
       seatNumberCounts: counts,
-      duplicatePositions: positions
+      duplicatePositions: duplicatePositions
     };
   }
 

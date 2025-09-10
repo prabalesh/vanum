@@ -11,7 +11,7 @@ interface SeatGridProps {
   customRowNames: string[];
   isDuplicate: (rowIndex: number, colIndex: number) => boolean;
   onSeatClick: (rowIndex: number, colIndex: number) => void;
-  onSeatDoubleClick: (rowIndex: number, colIndex: number) => void;
+  onSeatEdit: (rowIndex: number, colIndex: number) => void; // Add this
   onRowSelect: (rowIndex: number) => void;
   onRowToggle: (rowIndex: number) => void;
 }
@@ -23,7 +23,7 @@ export default function SeatGrid({
   customRowNames,
   isDuplicate,
   onSeatClick,
-  onSeatDoubleClick,
+  onSeatEdit, // Make sure this prop is defined
   onRowSelect,
   onRowToggle
 }: SeatGridProps) {
@@ -71,7 +71,7 @@ export default function SeatGrid({
                         colIndex={colIndex}
                         isDuplicate={isDuplicate(rowIndex, colIndex)}
                         onClick={onSeatClick}
-                        onDoubleClick={onSeatDoubleClick}
+                        onEdit={onSeatEdit} // Make sure this is passed
                       />
                     );
                   })}
