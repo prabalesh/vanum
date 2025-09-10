@@ -34,6 +34,16 @@ type UpdateMovieRequest struct {
 	IsActive      *bool        `json:"is_active,omitempty"`
 }
 
+type MovieLanguageRequest struct {
+	LanguageID     uint   `json:"language_id" binding:"required"`
+	Title          string `json:"title" binding:"required"`
+	Description    string `json:"description"`
+	HasAudio       bool   `json:"has_audio"`
+	HasSubtitles   bool   `json:"has_subtitles"`
+	AudioFormat    string `json:"audio_format"`
+	SubtitleFormat string `json:"subtitle_format"`
+}
+
 type CreateScreeningRequest struct {
 	MovieID            uint      `json:"movie_id" binding:"required"`
 	ScreenID           uint      `json:"screen_id" binding:"required"`

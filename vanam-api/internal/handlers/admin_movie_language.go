@@ -6,20 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/dtos"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"github.com/prabalesh/vanam/vanam-api/internal/utils"
 	"gorm.io/gorm"
 )
-
-type MovieLanguageRequest struct {
-	LanguageID     uint   `json:"language_id" binding:"required"`
-	Title          string `json:"title" binding:"required"`
-	Description    string `json:"description"`
-	HasAudio       bool   `json:"has_audio"`
-	HasSubtitles   bool   `json:"has_subtitles"`
-	AudioFormat    string `json:"audio_format"`
-	SubtitleFormat string `json:"subtitle_format"`
-}
 
 // AddMovieLanguage - Add language support to a movie
 func AddMovieLanguage(c *gin.Context) {
@@ -30,7 +21,7 @@ func AddMovieLanguage(c *gin.Context) {
 		return
 	}
 
-	var req MovieLanguageRequest
+	var req dtos.MovieLanguageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
@@ -144,7 +135,7 @@ func UpdateMovieLanguage(c *gin.Context) {
 		return
 	}
 
-	var req MovieLanguageRequest
+	var req dtos.MovieLanguageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return

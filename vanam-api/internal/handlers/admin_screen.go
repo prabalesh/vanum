@@ -7,24 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/dtos"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"github.com/prabalesh/vanam/vanam-api/internal/utils"
 	"gorm.io/gorm"
 )
-
-type ScreenRequest struct {
-	Name       string                  `json:"name" binding:"required"`
-	TheaterID  uint                    `json:"theater_id" binding:"required"`
-	SeatLayout models.SeatLayoutConfig `json:"seat_layout" binding:"required"`
-	IsActive   *bool                   `json:"is_active"`
-}
-
-type UpdateScreenRequest struct {
-	Name       string                  `json:"name" binding:"required"`
-	SeatLayout models.SeatLayoutConfig `json:"seat_layout" binding:"required"`
-	IsActive   *bool                   `json:"is_active"`
-	// TheaterID is not needed since we're updating an existing screen
-}
 
 // GetScreensByTheater - Get all screens for a theater
 func GetScreensByTheater(c *gin.Context) {
@@ -72,7 +59,7 @@ func GetScreenByID(c *gin.Context) {
 
 // CreateScreen - Create new screen with seat layout
 func CreateScreen(c *gin.Context) {
-	var req ScreenRequest
+	var req dtos.ScreenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
@@ -173,7 +160,7 @@ func UpdateScreen(c *gin.Context) {
 		return
 	}
 
-	var req UpdateScreenRequest
+	var req dtos.UpdateScreenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return

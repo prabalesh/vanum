@@ -6,16 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/dtos"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"github.com/prabalesh/vanam/vanam-api/internal/utils"
 	"gorm.io/gorm"
 )
-
-type LanguageRequest struct {
-	Code       string `json:"code" binding:"required,min=2,max=5"`
-	Name       string `json:"name" binding:"required,min=1,max=100"`
-	NativeName string `json:"native_name"`
-}
 
 // GetAllLanguages - Get all languages (public endpoint)
 func GetAllLanguages(c *gin.Context) {
@@ -37,7 +32,7 @@ func GetAllLanguages(c *gin.Context) {
 
 // CreateLanguage - Create a new language (admin only)
 func CreateLanguage(c *gin.Context) {
-	var req LanguageRequest
+	var req dtos.LanguageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
@@ -73,7 +68,7 @@ func UpdateLanguage(c *gin.Context) {
 		return
 	}
 
-	var req LanguageRequest
+	var req dtos.LanguageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
