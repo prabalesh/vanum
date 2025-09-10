@@ -6,18 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prabalesh/vanam/vanam-api/internal/database"
+	"github.com/prabalesh/vanam/vanam-api/internal/dtos"
 	"github.com/prabalesh/vanam/vanam-api/internal/models"
 	"github.com/prabalesh/vanam/vanam-api/internal/utils"
 	"gorm.io/gorm"
 )
-
-type TheaterRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Address  string `json:"address"`
-	City     string `json:"city"`
-	State    string `json:"state"`
-	IsActive *bool  `json:"is_active"` // Pointer to allow null values
-}
 
 // GetTheaters - Get all theaters with optional pagination and filtering
 func GetTheaters(c *gin.Context) {
@@ -88,7 +81,7 @@ func GetTheaterByID(c *gin.Context) {
 
 // CreateTheater - Create new theater
 func CreateTheater(c *gin.Context) {
-	var req TheaterRequest
+	var req dtos.TheaterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
@@ -133,7 +126,7 @@ func UpdateTheater(c *gin.Context) {
 		return
 	}
 
-	var req TheaterRequest
+	var req dtos.TheaterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
 		return
