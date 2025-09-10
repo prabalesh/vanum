@@ -1,4 +1,3 @@
-// components/movies/LanguageForm.tsx
 import { useState, useEffect } from 'react';
 import { languagesApi } from '../../services/api';
 import toast from 'react-hot-toast';

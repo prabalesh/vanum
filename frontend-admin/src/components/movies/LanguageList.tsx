@@ -1,4 +1,3 @@
-// components/movies/LanguageList.tsx
 import { useState } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { languagesApi } from '../../services/api';

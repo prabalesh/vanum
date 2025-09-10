@@ -1,4 +1,3 @@
-// components/shared/ConfirmDeleteModal.tsx
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 

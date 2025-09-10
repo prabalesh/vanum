@@ -49,6 +49,7 @@ func Migrate() {
 		&models.Screen{},
 		&models.Screening{},
 		&models.Theater{},
+		&models.Seat{},
 	)
 
 	if err != nil {

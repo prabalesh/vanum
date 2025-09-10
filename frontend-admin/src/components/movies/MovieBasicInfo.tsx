@@ -1,4 +1,3 @@
-// components/movies/MovieBasicInfo.tsx
 import type { Movie } from '../../types';
 
 interface MovieBasicInfoProps {

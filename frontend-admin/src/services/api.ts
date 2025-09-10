@@ -12,8 +12,10 @@ import type {
   PaginatedResponse,
   Role,
   RoleFormData,
+  Screen,
   Screening,
   ScreeningFormData,
+  SeatLayoutConfig,
   Theater,
   UpdateUserFormData,
   User,
@@ -292,6 +294,41 @@ export const theatersApi = {
 
   toggleStatus: async (id: number) => {
     const response = await api.patch(`/theaters/${id}/toggle`);
+    return response.data;
+  }
+};
+
+// services/api.ts
+export const screensApi = {
+  getByTheater: async (theaterId: number) => {
+    const response = await public_api.get(`/theaters/${theaterId}/screens`);
+    return response.data;
+  },
+
+  getById: async (id: number) => {
+    const response = await public_api.get(`/screens/${id}`);
+    return response.data;
+  },
+
+  create: async (theaterId: number, data: {
+    name: string;
+    seat_layout: SeatLayoutConfig;
+    is_active?: boolean;
+  }) => {
+    const response = await api.post(`/theaters/${theaterId}/screens`, {
+      ...data,
+      theater_id: theaterId
+    });
+    return response.data;
+  },
+
+  update: async (id: number, data: Partial<Screen>) => {
+    const response = await api.put(`/screens/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number) => {
+    const response = await api.delete(`/screens/${id}`);
     return response.data;
   }
 };

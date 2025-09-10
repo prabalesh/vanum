@@ -1,4 +1,3 @@
-// components/movies/MovieCard.tsx
 import { useNavigate } from 'react-router-dom';
 import {
   PencilIcon,
